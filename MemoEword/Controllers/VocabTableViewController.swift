@@ -72,10 +72,27 @@ class VocabTableViewController: UITableViewController {
                 let randNo = arc4random_uniform(UInt32(self.vocabs.count))
                 content.body = self.vocabs[Int(randNo)].content
                 content.title = "New Word"
-            
+                
+                let acceptAction = UNNotificationAction(identifier: String(i) + "yes",
+                                                        title: "I know it",
+                                                        options: UNNotificationActionOptions(rawValue: 0))
+                let declineAction = UNNotificationAction(identifier: String(i) + "no",
+                                                         title: "I dont'",
+                                                         options: UNNotificationActionOptions(rawValue: 0))
+                // Define the notification type
+                let checkUserknowledge =
+                    UNNotificationCategory(identifier: "Check_Knowledge",
+                                           actions: [acceptAction, declineAction],
+                                           intentIdentifiers: [],
+                                           hiddenPreviewsBodyPlaceholder: "",
+                                           options: .customDismissAction)
+                content.categoryIdentifier = "Check_Knowledge"
+                
+                UNUserNotificationCenter.current().setNotificationCategories([checkUserknowledge])
+                
                 let trigger = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(i*60), repeats: false)
                 print(i*5)
-                 let request = UNNotificationRequest(identifier: String(i), content: content, trigger: trigger)
+                let request = UNNotificationRequest(identifier: String(i), content: content, trigger: trigger)
                 if(request == nil){
                     print(" request error")
                 }
@@ -89,6 +106,7 @@ class VocabTableViewController: UITableViewController {
                         print("Notification Success ")
                     }
                 })
+                
             }
         }
     }
@@ -113,6 +131,32 @@ class VocabTableViewController: UITableViewController {
         checkVocabsForRemind()
     }
     
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler:
+        @escaping () -> Void) {
+        
+        // Get the meeting ID from the original notification.
+        let userInfo = response.notification.request.content.userInfo
+        let meetingID = userInfo["MEETING_ID"] as! String
+        let userID = userInfo["USER_ID"] as! String
+        
+        // Perform the task associated with the action.
+        switch response.actionIdentifier {
+        case "ACCEPT_ACTION":
+            break
+            
+        case "DECLINE_ACTION":
+            break
+            
+        default:
+            break
+        }
+        
+        // Always call the completion handler when done.
+        completionHandler()
+    }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
